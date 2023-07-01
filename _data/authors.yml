@@ -1,0 +1,8 @@
+Harry:
+  type      : # "person" (default), "organization"
+  name      : Harry
+  url       :
+  avatar    : # path or url of avatar image (square)
+  bio       : # I am an amazing person.
+  email     : # @163.com
+

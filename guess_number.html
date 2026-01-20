@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猜数字游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        .mode-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .mode-btn {
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+        .mode-btn.primary {
+            background: #667eea;
+            color: white;
+        }
+        .mode-btn.primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        .mode-btn.secondary {
+            background: #764ba2;
+            color: white;
+        }
+        .mode-btn.secondary:hover {
+            background: #6a3d91;
+            transform: translateY(-2px);
+        }
+        .game-area {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        .game-area.active {
+            display: block;
+        }
+        .instruction {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: #495057;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .guess-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 30px 0;
+        }
+        .input-area {
+            margin: 30px 0;
+        }
+        .input-area input {
+            width: 100%;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+        .feedback-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .feedback-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .feedback-btn.too-big {
+            background: #ff6b6b;
+            color: white;
+        }
+        .feedback-btn.too-small {
+            background: #4ecdc4;
+            color: white;
+        }
+        .feedback-btn.correct {
+            background: #51cf66;
+            color: white;
+        }
+        .feedback-btn:hover {
+            transform: scale(1.05);
+        }
+        .feedback {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .feedback.big {
+            color: #ff6b6b;
+            background: #fff5f5;
+        }
+        .feedback.small {
+            color: #4ecdc4;
+            background: #e3fafc;
+        }
+        .feedback.success {
+            color: #51cf66;
+            background: #ebfbee;
+        }
+        .attempts {
+            font-size: 18px;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        .submit-btn {
+            background: #51cf66;
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover {
+            background: #40c057;
+            transform: translateY(-2px);
+        }
+        .restart-btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        .restart-btn:hover {
+            background: #5568d3;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 猜数字游戏</h1>
+        
+        <div id="modeSelection">
+            <div class="mode-buttons">
+                <button class="mode-btn primary" onclick="startGame('userGuess')">你想我猜</button>
+                <button class="mode-btn secondary" onclick="startGame('computerGuess')">我想你猜</button>
+            </div>
+        </div>
+
+        <div id="userGuessGame" class="game-area">
+            <div class="instruction">
+                我想好了一个 1-100 之间的数字，你来猜猜看！
+            </div>
+            <div class="input-area">
+                <input type="number" id="userGuessInput" min="1" max="100" placeholder="输入你的猜测 (1-100)">
+            </div>
+            <button class="submit-btn" onclick="userGuess()">猜！</button>
+            <div id="userFeedback" class="feedback" style="display: none;"></div>
+            <div class="attempts">已猜次数: <span id="userAttempts">0</span></div>
+        </div>
+
+        <div id="computerGuessGame" class="game-area">
+            <div class="instruction">
+                请你在心里想好一个 1-100 之间的数字，我会来猜！不要告诉任何人哦！
+            </div>
+            <div class="guess-display">我猜: <span id="computerGuess">?</span></div>
+            <div class="feedback-buttons">
+                <button class="feedback-btn too-big" onclick="computerFeedback('big')">大了</button>
+                <button class="feedback-btn too-small" onclick="computerFeedback('small')">小了</button>
+                <button class="feedback-btn correct" onclick="computerFeedback('correct')">对了</button>
+            </div>
+            <div class="attempts">我已猜: <span id="computerAttempts">0</span> 次</div>
+        </div>
+
+        <div id="resultScreen" class="game-area">
+            <div class="guess-display" id="resultMessage"></div>
+            <div class="attempts">总共猜了 <span id="totalAttempts">0</span> 次</div>
+            <button class="restart-btn" onclick="restartGame()">再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = '';
+        let targetNumber = 0;
+        let userAttempts = 0;
+        let computerAttempts = 0;
+        let computerMin = 1;
+        let computerMax = 100;
+        let computerGuess = 0;
+
+        function startGame(mode) {
+            currentMode = mode;
+            document.getElementById('modeSelection').style.display = 'none';
+            
+            if (mode === 'userGuess') {
+                targetNumber = Math.floor(Math.random() * 100) + 1;
+                userAttempts = 0;
+                document.getElementById('userAttempts').textContent = userAttempts;
+                document.getElementById('userFeedback').style.display = 'none';
+                document.getElementById('userGuessInput').value = '';
+                document.getElementById('userGuessGame').classList.add('active');
+            } else {
+                computerMin = 1;
+                computerMax = 100;
+                computerAttempts = 0;
+                makeComputerGuess();
+                document.getElementById('computerAttempts').textContent = computerAttempts;
+                document.getElementById('computerGuessGame').classList.add('active');
+            }
+        }
+
+        function userGuess() {
+            const input = document.getElementById('userGuessInput');
+            const guess = parseInt(input.value);
+            
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                alert('请输入 1-100 之间的数字！');
+                return;
+            }
+            
+            userAttempts++;
+            document.getElementById('userAttempts').textContent = userAttempts;
+            
+            const feedback = document.getElementById('userFeedback');
+            feedback.style.display = 'block';
+            
+            if (guess > targetNumber) {
+                feedback.textContent = '太大了！';
+                feedback.className = 'feedback big';
+            } else if (guess < targetNumber) {
+                feedback.textContent = '太小了！';
+                feedback.className = 'feedback small';
+            } else {
+                feedback.textContent = '恭喜你，猜对了！';
+                feedback.className = 'feedback success';
+                showResult('user', userAttempts);
+            }
+            
+            input.value = '';
+            input.focus();
+        }
+
+        function makeComputerGuess() {
+            computerGuess = Math.floor((computerMin + computerMax) / 2);
+            document.getElementById('computerGuess').textContent = computerGuess;
+        }
+
+        function computerFeedback(feedback) {
+            computerAttempts++;
+            document.getElementById('computerAttempts').textContent = computerAttempts;
+            
+            if (feedback === 'big') {
+                computerMax = computerGuess - 1;
+                makeComputerGuess();
+            } else if (feedback === 'small') {
+                computerMin = computerGuess + 1;
+                makeComputerGuess();
+            } else {
+                showResult('computer', computerAttempts);
+            }
+        }
+
+        function showResult(winner, attempts) {
+            document.querySelectorAll('.game-area').forEach(area => {
+                area.classList.remove('active');
+            });
+            
+            const resultScreen = document.getElementById('resultScreen');
+            const resultMessage = document.getElementById('resultMessage');
+            document.getElementById('totalAttempts').textContent = attempts;
+            
+            if (winner === 'user') {
+                resultMessage.textContent = '🎉 恭喜你猜对了！';
+            } else {
+                resultMessage.textContent = '🤖 我猜对了！';
+            }
+            
+            resultScreen.classList.add('active');
+        }
+
+        function restartGame() {
+            document.querySelectorAll('.game-area').forEach(area => {
+                area.classList.remove('active');
+            });
+            document.getElementById('modeSelection').style.display = 'block';
+        }
+
+        document.getElementById('userGuessInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                userGuess();
+            }
+        });
+    </script>
+</body>
+</html>
